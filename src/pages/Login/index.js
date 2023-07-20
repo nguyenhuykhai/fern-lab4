@@ -1,0 +1,334 @@
+import React, { useEffect, useState, useMemo, useContext } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { images } from "../../assets/images";
+import styles from "./Login.module.css";
+import jwt_decode from "jwt-decode";
+
+// IMPORT MUI
+import { Alert, AlertTitle, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, Button } from "@mui/material";
+
+export default function Login() {
+  const [show, setShow] = useState("false");
+  const [date, setDate] = useState(new Date().toJSON());
+  const [isFinish, setIsFinish] = useState(false);
+  const [message, setMessage] = useState();
+
+  useEffect(() => {
+    /* global google*/
+    window.onload = function () {
+      google.accounts.id.initialize({
+        client_id:
+          "420736768866-182b7c42c01gkk83kat9ph7bjdi4nn1b.apps.googleusercontent.com",
+        callback: handleCredentialResponse,
+      });
+      google.accounts.id.renderButton(
+        document.getElementById("buttonDiv"),
+        { theme: "outline", size: "large" } // customization attributes
+      );
+      google.accounts.id.prompt(); // also display the One Tap dialog
+    };
+  }, []);
+
+  const handleCredentialResponse = (response) => {
+    console.log("Encoded JWT ID token: " + response.credential);
+    var decoded = jwt_decode(response.credential);
+    checkUserIsSignedIn(decoded);
+  };
+
+  const navigate = useNavigate();
+
+  const hanlerShow_disclosure = () => {
+    setShow(!show);
+  };
+  const addNewUser = (newUser) => {
+    fetch("https://64acf61eb470006a5ec514b7.mockapi.io/movie/account", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      // Send your data in the request body as JSON
+      body: JSON.stringify(newUser),
+    })
+      .then((res) => {
+        if (res.ok) {
+          return res.json();
+        }
+        // handle error
+      })
+      .then(() => { })
+      .catch((error) => {
+        // handle error
+      });
+  };
+
+  //set localStorage with ID of user are found
+
+  function checkUserIsSignedIn(decodedObj) {
+    console.log(decodedObj.email);
+    fetch(
+      `https://64acf61eb470006a5ec514b7.mockapi.io/movie/account?email=${decodedObj.email}`,
+      {
+        method: "GET",
+        headers: { "content-type": "application/json" },
+      }
+    )
+      .then((res) => {
+        if (res.ok) {
+          return res.json();
+        }
+        // handle error
+      })
+      .then((tasks) => {
+        // Do something with the list of tasks - User already exist in api
+        if (tasks.length !== 0) {
+          localStorage.setItem("accessToken", true);
+          localStorage.setItem("email", decodedObj?.email);
+          localStorage.setItem("name", tasks[0].fullName);
+          localStorage.setItem("images", decodedObj?.picture);
+          localStorage.setItem("gender", tasks[0].gender);
+          localStorage.setItem("memberShip", tasks[0].memberShip);
+          localStorage.setItem("phone", tasks[0].phone);
+          CheckExpiredDate();
+          document.getElementById("buttonDiv").hidden = true;
+          if (decodedObj.email == "datntse150392@fpt.edu.vn") {
+            navigate("/admin");
+          } else {
+            navigate("/film/homePage");
+          }
+        } else if (tasks.length === 0) {
+          const newUser = {
+            fullName: `${decodedObj?.name}`,
+            email: `${decodedObj?.email}`,
+            avatar: `${decodedObj?.picture}`,
+            phone: "null",
+            gender: "null",
+            memberShip: false,
+            createdAt: date,
+            password: "null",
+            expiredDate: "null",
+          };
+          addNewUser(newUser);
+          localStorage.setItem("accessToken", true);
+          localStorage.setItem("email", decodedObj?.email);
+          localStorage.setItem("name", decodedObj?.name);
+          localStorage.setItem("images", decodedObj?.picture);
+          localStorage.setItem("gender", newUser.gender);
+          localStorage.setItem("memberShip", newUser.memberShip);
+          localStorage.setItem("phone", newUser.phone);
+          navigate("/film/homePage");
+        }
+        window.location.reload();
+      })
+      .catch((error) => {
+        // handle error
+      });
+  }
+
+  async function DisableMemberShipWithID(id) {
+    const res = await fetch(
+      `https://64acf61eb470006a5ec514b7.mockapi.io/movie/account/${id}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ memberShip: false, expiredDate: null }),
+      }
+    );
+    try {
+      const result = res.json();
+      if (result) {
+        localStorage.setItem("memberShip", false);
+        return;
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  function CheckExpiredDate(expiredDate, accountID) {
+    let currentDate = new Date().toJSON().slice(0, 10);
+    console.log(currentDate);
+    console.log(expiredDate);
+    if (expiredDate - currentDate >= 0) {
+      DisableMemberShipWithID(accountID);
+    }
+  }
+
+  // Hanler Login Account Normal
+  const [account, setAccount] = useState({
+    email: "",
+    password: "",
+  });
+
+  //XỬ LÝ ĐĂNG NHẬP BẰNG TÀI KHOẢN MẬT KHẨU
+  const hanlerLoginAccount = (e) => {
+    e.preventDefault();
+    console.log(account);
+    const handleLoginNormal = () => {
+      console.log(account);
+      fetch(
+        `https://64acf61eb470006a5ec514b7.mockapi.io/movie/account?email=${account.email}`,
+        {
+          method: "GET",
+          headers: { "content-type": "application/json" },
+        }
+      )
+        .then((res) => {
+          if (res.ok) {
+            return res.json();
+          }
+          // handle error
+        })
+        .then((tasks) => {
+          if (tasks.length !== 0) {
+            if (tasks[0].password == account.password) {
+              localStorage.setItem("accessToken", true);
+              localStorage.setItem("email", tasks[0].email);
+              localStorage.setItem("name", tasks[0].fullName);
+              localStorage.setItem("images", tasks[0].avatar);
+              localStorage.setItem("gender", tasks[0].gender);
+              localStorage.setItem("memberShip", tasks[0].memberShip);
+              localStorage.setItem("phone", tasks[0].phone);
+              CheckExpiredDate();
+              navigate("/film/homePage");
+              window.location.reload();
+            } else {
+              setIsFinish(true);
+              setMessage("Sai mật khẩu");
+            }
+          } else if (tasks.length === 0) {
+            setIsFinish(true);
+            setMessage("Tài khoản không tồn tại");
+          }
+        })
+        .catch((error) => {
+        });
+    }
+    handleLoginNormal()
+  };
+
+  //XỬ LÝ POPUP THÔNG BÁO
+  const handleCloseFinish = () => {
+    setIsFinish(false);
+  };
+
+  return (
+    <div className={styles["login-container"]}>
+      <div className={styles["login"]}>
+        <div className={styles["logo"]}>
+          <Link to={"/"}>
+            <img src={images.logo} />
+          </Link>
+        </div>
+      </div>
+      <div className={styles["login-content"]}>
+        <div className={styles["login-content-top"]}>
+          <h1>Đăng nhập</h1>
+          <form
+            onSubmit={e => hanlerLoginAccount(e)}
+            className={styles["login-form"]}
+          >
+            <input
+              type="text"
+              placeholder="Email hoặc số điện thoại"
+              className={styles["login-input-email"]}
+              onChange={(e) =>
+                setAccount((prev) => ({
+                  ...prev,
+                  email: e.target.value,
+                }))
+              }
+            />
+            <input
+              type="password"
+              placeholder="Mật khẩu"
+              className={styles["login-input-password"]}
+              onChange={(e) =>
+                setAccount((prev) => ({
+                  ...prev,
+                  password: e.target.value,
+                }))
+              }
+            />
+            <button type="submit" className={styles["login-content-btn"]}>Đăng nhập</button>
+            <h4
+              style={{
+                color: "white",
+                padding: "10px 0px",
+                overflow: "hidden",
+              }}
+            >
+              Hoặc bạn có thể đăng nhập thông qua
+            </h4>
+            <div className={styles["login-gg"]}>
+              <div style={{ overflow: "hidden" }} id="buttonDiv"></div>
+            </div>
+
+            <div className={styles["login-content-form-help"]}>
+              <div className={styles["input-login-rememberme"]}>
+                <input type="checkbox" id="remember-me" />
+                <label for="remember-me">Ghi nhớ tôi</label>
+              </div>
+              <a href="#">Bạn cần trợ giúp?</a>
+            </div>
+          </form>
+        </div>
+        <div className={styles["login-content-bottom"]}>
+          <div className={styles["login-signup-now"]}>
+            Bạn mới tham gia GalaxyPlay?
+            <a href="#">Đăng kí ngay</a>
+          </div>
+          <div className={styles["recaptcha-terms-of-use"]}>
+            <span>
+              Trang này được Google reCAPTCHA bảo vệ để đảm bảo bạn không phải
+              là robot.
+            </span>
+            {show && (
+              <button
+                className={styles["recaptcha-terms-of-use--link-button"]}
+                onClick={hanlerShow_disclosure}
+              >
+                Tìm hiểu thêm
+              </button>
+            )}
+          </div>
+          {!show && (
+            <div className={styles["cha-terms-of-use--disclosure"]}>
+              <span>
+                Thông tin do Google reCAPTCHA thu thập sẽ tuân theo{" "}
+                <a href="https://policies.google.com/privacy" target="_blank">
+                  Chính sách Quyền riêng tư
+                </a>{" "}
+                and{" "}
+                <a href="https://policies.google.com/terms" target="_blank">
+                  Điều khoản dịch vụ
+                </a>{" "}
+                của Google, và được dùng để cung cấp, duy trì và cải thiện dịch
+                vụ reCAPTCHA cũng như các mục đích bảo mật nói chung.
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* //XỬ LÝ POPUP ERROR SAI PASSWORD HOẶC TÀI KHOẢN KHÔNG TỒN TẠI */}
+      <Dialog
+        open={isFinish}
+        onClose={handleCloseFinish}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{"Ối!!! Lỗi rồi"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            <Alert severity="error">
+              <AlertTitle>{message}</AlertTitle>
+            </Alert>
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button autoFocus onClick={handleCloseFinish}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </div>
+  );
+}

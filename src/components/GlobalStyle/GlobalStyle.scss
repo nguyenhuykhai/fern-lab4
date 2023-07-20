@@ -1,0 +1,55 @@
+@import "normalize.css";
+
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700&family=Markazi+Text:wght@500&family=Oswald:wght@200;300;400;500;600;700&family=Rokkitt:wght@100&family=Titillium+Web:wght@200&display=swap");
+
+:root {
+  background-color: black;
+  background-size: cover;
+  object-fit: cover;
+}
+
+body {
+  padding-right: 0px !important;
+}
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  font-family: "Manrope", sans-serif;
+  font-size: 16px;
+  --text-color: #fff;
+}
+
+*::-webkit-scrollbar {
+  width: 0px;
+}
+
+html {
+}
+
+button,
+input,
+[tabindex] {
+  outline: none;
+  border: none;
+}
+
+a[href] {
+  color: var(--text-color);
+  text-decoration: none;
+}
+
+.defaultLayout {
+  background-size: cover;
+  object-fit: cover;
+  background-color: rgb(0 0 0 / 40%);
+  background-image: linear-gradient(
+      to right bottom,
+      rgba(0, 0, 0, 0.44),
+      rgba(0, 0, 0, 0.324)
+    ),
+    url(https://galaxyplay.vn/landings/assets/img/svod-trial-7day-bg-web.jpg);
+  //url(https://assets.nflxext.com/ffe/siteui/vlv3/73334647-ad51-42a9-b07b-93298cc2a8e1/a13fedda-da19-4b61-8063-5f715391b742/VN-vi-20230605-popsignuptwoweeks-perspective_alpha_website_large.jpg);
+}
