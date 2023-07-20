@@ -18,7 +18,7 @@ export default function Login() {
     window.onload = function () {
       google.accounts.id.initialize({
         client_id:
-          "420736768866-182b7c42c01gkk83kat9ph7bjdi4nn1b.apps.googleusercontent.com",
+          "766192683093-aijpda08duh9nkkcp6q3pehvpbg3nj91.apps.googleusercontent.com",
         callback: handleCredentialResponse,
       });
       google.accounts.id.renderButton(
