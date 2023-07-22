@@ -1,3 +1,20 @@
+# 4AE MOVIE WEB APP
+
+Your one-stop platform for VJP members to stream and purchase movies, while admins manage the site effortlessly.
+
+**Live demo** https://fern-lab4.vercel.app/
+## Tech Stack
+
+**Client:** ReactJS, Material UI, Messenger Chat Plugin, Google Cloud integration (login with google, send mail), PayPal integration, VietQR api
+
+**API:** mockAPI
+
+**Deploy environment** Vercel
+
+## Main repository at
+
+https://github.com/datntse150392/NTNE_BE_SWP391.git
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
