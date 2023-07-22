@@ -13,7 +13,7 @@ Your one-stop platform for VJP members to stream and purchase movies, while admi
 
 ## Main repository at
 
-https://github.com/datntse150392/NTNE_BE_SWP391.git
+[https://github.com/datntse150392/NTNE_BE_SWP391.git](https://github.com/datntse150392/FER_LAB4_MOVIE.git)
 
 # Getting Started with Create React App
 
